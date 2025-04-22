@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Memory Card Game</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #222;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      margin: 20px 0;
+      color: #00ffe1;
+    }
+
+    #game-board {
+      display: grid;
+      grid-template-columns: repeat(4, 100px);
+      grid-gap: 15px;
+    }
+
+    .card {
+      width: 100px;
+      height: 100px;
+      background-color: #444;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      cursor: pointer;
+      border-radius: 10px;
+      user-select: none;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    .card.revealed, .card.matched {
+      background-color: #00ffe1;
+      color: #222;
+    }
+
+    .card.matched {
+      cursor: default;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Memory Card Game</h1>
+  <div id="game-board"></div>
+
+  <script>
+    const emojis = ['🍕', '🍔', '🍟', '🌮', '🌯', '🥗'];
+    let cardValues = [...emojis, ...emojis]; // duplicate for pairs
+    cardValues = cardValues.sort(() => 0.5 - Math.random()); // shuffle
+
+    const gameBoard = document.getElementById('game-board');
+    let firstCard = null;
+    let secondCard = null;
+    let lockBoard = false;
+
+    cardValues.forEach(value => {
+      const card = document.createElement('div');
+      card.classList.add('card');
+      card.dataset.value = value;
+      card.textContent = '❓';
+      card.addEventListener('click', () => handleCardClick(card));
+      gameBoard.appendChild(card);
+    });
+
+    function handleCardClick(card) {
+      if (lockBoard || card.classList.contains('revealed') || card.classList.contains('matched')) return;
+
+      card.textContent = card.dataset.value;
+      card.classList.add('revealed');
+
+      if (!firstCard) {
+        firstCard = card;
+      } else {
+        secondCard = card;
+        lockBoard = true;
+
+        if (firstCard.dataset.value === secondCard.dataset.value) {
+          firstCard.classList.add('matched');
+          secondCard.classList.add('matched');
+          resetTurn();
+        } else {
+          setTimeout(() => {
+            firstCard.textContent = '❓';
+            secondCard.textContent = '❓';
+            firstCard.classList.remove('revealed');
+            secondCard.classList.remove('revealed');
+            resetTurn();
+          }, 1000);
+        }
+      }
+    }
+
+    function resetTurn() {
+      [firstCard, secondCard] = [null, null];
+      lockBoard = false;
+    }
+  </script>
+
+</body>
+</html>
